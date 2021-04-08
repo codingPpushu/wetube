@@ -36,7 +36,7 @@ export const githubLogin = passport.authenticate('github');
 
 export const githubLoginCallback = async (_, __, profile, cb) => {
   const {
-    _json: { id, avatar_url, name, email },
+    _json: { id, avatar_url: avatarUrl, name, email },
   } = profile;
   try {
     const user = await User.findOne({ email });
@@ -49,7 +49,7 @@ export const githubLoginCallback = async (_, __, profile, cb) => {
       email,
       name,
       githubId: id,
-      avatarUrl: avatar_url,
+      avatarUrl,
     });
     return cb(null, newUser);
   } catch (error) {
@@ -61,15 +61,69 @@ export const postGithubLogIn = (req, res) => {
   res.redirect(routes.home);
 };
 
+export const kakaoLogin = passport.authenticate('kakao');
+
+export const kakaoLoginCallback = async (_, __, profile, cb) => {
+  const {
+    id,
+    username: name,
+    _json: {
+      properties: { profile_image },
+      kakao_account: { email },
+    },
+  } = profile;
+
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      user.kakaoId = id;
+      user.save();
+      return cb(null, user);
+    } else {
+      const newUser = await User.create({
+        email,
+        name,
+        kakaoId: id,
+        avatarUrl: profile_image,
+      });
+      return cb(null, newUser);
+    }
+  } catch (error) {
+    return cb(error);
+  }
+};
+
+export const postkakaoLogIn = (req, res) => {
+  res.redirect(routes.home);
+};
+
 export const logout = (req, res) => {
   req.logout();
   res.redirect(routes.home);
 };
 
+export const getMe = (req, res) => {
+  res.render('userDetail', {
+    pageTitle: 'User Detail',
+    user: req.user,
+  });
+};
+
+export const userDetail = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  const user = await User.findById(id);
+  try {
+    res.render('userDetail', { pageTitle: 'User Detail', user });
+  } catch (error) {
+    res.redirect(routes.home);
+  }
+};
+
 export const users = (req, res) => res.render('users', { pageTitle: 'Users' });
 export const editProfile = (req, res) =>
   res.render('editProfile', { pageTitle: 'Edit Profile' });
-export const userDetail = (req, res) =>
-  res.render('userDetail', { pageTitle: 'User Detail' });
+
 export const changePassword = (req, res) =>
   res.render('changePassword', { pageTitle: 'Change Password' });

@@ -24,11 +24,12 @@
     }
     ul {
       display: flex;
-      color: white;
       text-transform: uppercase;
       font-weight: 600;
       li:not(:last-child) {
         margin-right: 15px;
+      }
+      a {
         color: white;
       }
     }
@@ -41,7 +42,7 @@
         font-size: 14px;
         color: $black;
         font-weight: 600;
-        max-width:none;
+        max-width: none;
         &::placeholder {
           font-weight: 300;
           color: rgba(0, 0, 0, 0.7);
