@@ -38,6 +38,7 @@ export const githubLoginCallback = async (_, __, profile, cb) => {
   const {
     _json: { id, avatar_url: avatarUrl, name, email },
   } = profile;
+  console.log(profile);
   try {
     const user = await User.findOne({ email });
     if (user) {
@@ -122,8 +123,27 @@ export const userDetail = async (req, res) => {
 };
 
 export const users = (req, res) => res.render('users', { pageTitle: 'Users' });
-export const editProfile = (req, res) =>
+
+export const getEditProfile = (req, res) =>
   res.render('editProfile', { pageTitle: 'Edit Profile' });
+
+export const postEditProfile = async (req, res) => {
+  const {
+    user: { _id: id },
+    body: { name, email },
+    file,
+  } = req;
+  try {
+    await User.findByIdAndUpdate(req.user.id, {
+      name,
+      email,
+      avatarUrl: file ? file.path : req.user.avatarUrl,
+    });
+    res.redirect(routes.me);
+  } catch (error) {
+    res.render('editProfile', { pageTitle: 'Edit Profile' });
+  }
+};
 
 export const changePassword = (req, res) =>
   res.render('changePassword', { pageTitle: 'Change Password' });
